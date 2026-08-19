@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>EduTrack — Attendance Management</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <div class="logo">
+      <span class="logo-icon">📘</span>
+      <span class="logo-text">EduTrack</span>
+    </div>
+    <button class="close-sidebar" onclick="toggleSidebar()">✕</button>
+  </div>
+  <nav class="sidebar-nav">
+    <a href="#" class="nav-item active" onclick="showPage('dashboard')">
+      <span class="nav-icon">🏠</span> Dashboard
+    </a>
+    <a href="#" class="nav-item" onclick="showPage('students')">
+      <span class="nav-icon">👥</span> Students
+    </a>
+    <a href="#" class="nav-item" onclick="showPage('attendance')">
+      <span class="nav-icon">✅</span> Mark Attendance
+    </a>
+    <a href="#" class="nav-item" onclick="showPage('reports')">
+      <span class="nav-icon">📊</span> Reports
+    </a>
+  </nav>
+</aside>
+
+<!-- MAIN -->
+<div class="main-wrapper" id="mainWrapper">
+  <header class="topbar">
+    <div class="topbar-left">
+      <button class="hamburger" onclick="toggleSidebar()">☰</button>
+      <span class="page-title" id="pageTitle">Dashboard</span>
+    </div>
+    <div class="topbar-right">
+      <span class="date-badge" id="todayDate"></span>
+      <div class="avatar">AD</div>
+    </div>
+  </header>
+
+  <!-- PAGES -->
+  <main class="content">
+
+    <!-- DASHBOARD -->
+    <section class="page active" id="page-dashboard">
+      <div class="section-label">Overview</div>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon" style="background:#e8f4fd;">👥</div>
+          <div class="stat-info">
+            <div class="stat-number" id="stat-total">0</div>
+            <div class="stat-label">Total Students</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:#e6f7ee;">✅</div>
+          <div class="stat-info">
+            <div class="stat-number" id="stat-present">0</div>
+            <div class="stat-label">Present Today</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:#fff3e0;">❌</div>
+          <div class="stat-info">
+            <div class="stat-number" id="stat-absent">0</div>
+            <div class="stat-label">Absent Today</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:#f3e8ff;">📈</div>
+          <div class="stat-info">
+            <div class="stat-number" id="stat-rate">0%</div>
+            <div class="stat-label">Attendance Rate</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-label" style="margin-top:2rem;">Today's Quick View</div>
+      <div class="card">
+        <table class="data-table" id="dashboardTable">
+          <thead>
+            <tr>
+              <th>Roll No</th>
+              <th>Name</th>
+              <th>Class</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="dashboardBody">
+            <tr><td colspan="4" class="empty-row">No attendance marked yet for today.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="section-label" style="margin-top:2rem;">Attendance Bar (Today)</div>
+      <div class="card">
+        <div class="bar-chart" id="barChart"></div>
+      </div>
+    </section>
+
+    <!-- STUDENTS -->
+    <section class="page" id="page-students">
+      <div class="section-label">Student Management</div>
+      <div class="card" style="margin-bottom:1.5rem;">
+        <h3 class="card-title">Add New Student</h3>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Roll Number</label>
+            <input type="text" id="rollNo" placeholder="e.g. 101" />
+          </div>
+          <div class="form-group">
+            <label>Full Name</label>
+            <input type="text" id="stuName" placeholder="e.g. Riya Sharma" />
+          </div>
+          <div class="form-group">
+            <label>Class / Section</label>
+            <input type="text" id="stuClass" placeholder="e.g. 10-A" />
+          </div>
+        </div>
+        <button class="btn btn-primary" onclick="addStudent()">+ Add Student</button>
+      </div>
+
+      <div class="card">
+        <div class="card-header-row">
+          <h3 class="card-title">All Students</h3>
+          <input type="text" class="search-box" id="studentSearch" placeholder="Search name or roll..." onkeyup="filterStudents()"/>
+        </div>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Roll No</th>
+              <th>Name</th>
+              <th>Class</th>
+              <th>Total Present</th>
+              <th>Total Absent</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="studentTableBody">
+            <tr><td colspan="6" class="empty-row">No students added yet.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- MARK ATTENDANCE -->
+    <section class="page" id="page-attendance">
+      <div class="section-label">Mark Attendance</div>
+
+      <div class="card" style="margin-bottom:1.5rem;">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Select Date</label>
+            <input type="date" id="attendanceDate" />
+          </div>
+          <div class="form-group">
+            <label>Filter by Class</label>
+            <select id="classFilter" onchange="renderAttendanceTable()">
+              <option value="">All Classes</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header-row">
+          <h3 class="card-title">Student List</h3>
+          <div style="display:flex;gap:8px;">
+            <button class="btn btn-sm btn-success" onclick="markAll('Present')">Mark All Present</button>
+            <button class="btn btn-sm btn-danger" onclick="markAll('Absent')">Mark All Absent</button>
+          </div>
+        </div>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Roll No</th>
+              <th>Name</th>
+              <th>Class</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="attendanceTableBody">
+            <tr><td colspan="4" class="empty-row">Add students first to mark attendance.</td></tr>
+          </tbody>
+        </table>
+        <div style="margin-top:1rem;">
+          <button class="btn btn-primary" onclick="saveAttendance()">💾 Save Attendance</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- REPORTS -->
+    <section class="page" id="page-reports">
+      <div class="section-label">Attendance Reports</div>
+
+      <div class="card" style="margin-bottom:1.5rem;">
+        <div class="form-row">
+          <div class="form-group">
+            <label>From Date</label>
+            <input type="date" id="reportFrom" />
+          </div>
+          <div class="form-group">
+            <label>To Date</label>
+            <input type="date" id="reportTo" />
+          </div>
+          <div class="form-group">
+            <label>Filter by Class</label>
+            <select id="reportClass">
+              <option value="">All Classes</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn btn-primary" onclick="generateReport()">📊 Generate Report</button>
+      </div>
+
+      <div class="card" id="reportOutput" style="display:none;">
+        <h3 class="card-title">Report Summary</h3>
+        <div class="stats-grid" id="reportStats"></div>
+        <table class="data-table" style="margin-top:1.5rem;">
+          <thead>
+            <tr>
+              <th>Roll No</th>
+              <th>Name</th>
+              <th>Class</th>
+              <th>Days Present</th>
+              <th>Days Absent</th>
+              <th>Attendance %</th>
+            </tr>
+          </thead>
+          <tbody id="reportTableBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script src="app.js"></script>
+</body>
+</html>
